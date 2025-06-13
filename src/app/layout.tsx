@@ -21,7 +21,7 @@ type RootLayoutProps = {
 export default function RootLayout({ children }: Readonly<RootLayoutProps>) {
   return (
     <html lang='pt-BR'>
-      <body data-color-mode='light'>
+      <body>
         <Container>
           <Header />
 

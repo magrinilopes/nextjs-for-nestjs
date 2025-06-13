@@ -1,9 +1,11 @@
 'use server';
 
+import { createLoginSessionFromApi } from '@/lib/login/manage-login';
 import { LoginSchema } from '@/lib/login/schemas';
 import { apiRequest } from '@/utils/api-request';
-import { asyncDelay } from '@/utils/async-delay';
 import { getZodErrorMessages } from '@/utils/get-zod-error-messages';
+import { verifyHoneypotInput } from '@/utils/verify-honeypot-input';
+import { redirect } from 'next/navigation';
 
 type LoginActionState = {
   email: string;
@@ -20,7 +22,14 @@ export async function loginAction(state: LoginActionState, formData: FormData) {
     };
   }
 
-  await asyncDelay(5000);
+  const isBot = await verifyHoneypotInput(formData, 5000);
+
+  if (isBot) {
+    return {
+      email: '',
+      errors: ['nice'],
+    };
+  }
 
   if (!(formData instanceof FormData)) {
     return {
@@ -59,14 +68,6 @@ export async function loginAction(state: LoginActionState, formData: FormData) {
     };
   }
 
-  console.log(loginResponse.data);
-
-  return {
-    email: '',
-    errors: ['Ok'],
-  };
-
-  // login ok - tudo valido
-  /* await createLoginSession(email);
-  redirect('/admin/post'); */
+  await createLoginSessionFromApi(loginResponse.data.accessToken);
+  redirect('/admin/post');
 }

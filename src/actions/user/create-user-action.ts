@@ -6,8 +6,8 @@ import {
   PublicUserSchema,
 } from '@/lib/user/schemas';
 import { apiRequest } from '@/utils/api-request';
-import { asyncDelay } from '@/utils/async-delay';
 import { getZodErrorMessages } from '@/utils/get-zod-error-messages';
+import { verifyHoneypotInput } from '@/utils/verify-honeypot-input';
 import { redirect } from 'next/navigation';
 
 type CreateUserActionState = {
@@ -20,7 +20,15 @@ export async function createUserAction(
   state: CreateUserActionState,
   formData: FormData,
 ): Promise<CreateUserActionState> {
-  await asyncDelay(3000);
+  const isBot = await verifyHoneypotInput(formData, 4000);
+
+  if (isBot) {
+    return {
+      user: state.user,
+      errors: ['nice'],
+      success: false,
+    };
+  }
 
   if (!(formData instanceof FormData)) {
     return {
@@ -37,7 +45,7 @@ export async function createUserAction(
     return {
       user: PublicUserSchema.parse(formObj),
       errors: getZodErrorMessages(parsedFormData.error.format()),
-      success: true,
+      success: false,
     };
   }
 

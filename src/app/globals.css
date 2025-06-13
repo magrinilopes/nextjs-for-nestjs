@@ -7,3 +7,9 @@
 	--color-blog: #ff0000; // uso text-blog bg-blog
 }
 */
+
+@layer utilities {
+  .niceInput {
+    @apply pointer-events-none absolute w-0 h-0 overflow-hidden opacity-0;
+  }
+}
